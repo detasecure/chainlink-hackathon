@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+docker
+python-dotenv
+beautifulsoup4
+pandas
+scikit-learn
+protobuf
+tensorflow
