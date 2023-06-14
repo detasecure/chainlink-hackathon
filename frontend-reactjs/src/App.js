@@ -7,7 +7,8 @@ import axios from 'axios';
 import Summary from './Summary';
 import PolygonContracts from './PolygonContracts';
 import EthereumContracts from './EthereumContracts';
-import RiskScoreForm from './RiskScoreForm';
+import PolygonRiskScoreForm from './PolygonRiskScoreForm';
+import EthereumRiskScoreForm from './EthereumRiskScoreForm';
 
 
 // Create a dark theme
@@ -59,9 +60,10 @@ function App() {
       <Tabs>
         <TabList>
           <Tab>Summary</Tab>
-          <Tab>Generate Smart Contract Risk Score</Tab>
-          <Tab>Polygon Contracts</Tab>
-          <Tab>Ethereum Contracts</Tab>
+          <Tab>Polygon Smart Contract Audit</Tab>
+          <Tab>Ethereum Smart Contract Audit</Tab>
+          <Tab>Leaderboard: Polygon</Tab>
+          <Tab>Leaderboard: Ethereum</Tab>
         </TabList>
 
         <TabPanel>
@@ -69,7 +71,11 @@ function App() {
         </TabPanel>
 
         <TabPanel>
-          <RiskScoreForm />
+          <PolygonRiskScoreForm />
+        </TabPanel>
+
+        <TabPanel>
+          <EthereumRiskScoreForm />
         </TabPanel>
 
         <TabPanel>

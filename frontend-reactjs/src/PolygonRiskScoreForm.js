@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { TextField, Button, Typography, makeStyles, CircularProgress } from '@material-ui/core';
+import AsciiLogoPolygon from './AsciiLogoPolygon';
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -19,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function RiskScoreForm() {
+function PolygonRiskScoreForm() {
   const classes = useStyles();
   const [address, setAddress] = useState('');
   const [riskScore, setRiskScore] = useState(null);
@@ -29,7 +30,7 @@ function RiskScoreForm() {
   const getRiskScore = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://3.108.126.225:8080/api/get_risk_score_polygon_mainnet_verified_contract?smart_contract_address=${address}`);
+      const response = await axios.get(`http://localhost:8080/api/get_risk_score_polygon_mainnet_verified_contract?smart_contract_address=${address}`);
       setRiskScore(response.data.risk_score);
       setAdditionalData(response.data); // store the entire response data
     } catch (error) {
@@ -45,10 +46,15 @@ function RiskScoreForm() {
         <br/>
         <br/>
 
+      <AsciiLogoPolygon/>
       <Typography variant="h5" gutterBottom>
-        Enter Smart Contract Address to get the security risk score <br/> Works only with the Polygon Mainnet Verified contracts. 
-        <br/> <a href="https://polygonscan.com/contractsVerified" target='_blank'>Find verified contracts here</a>
+        <pre>                                                                    
+          Smart Contract Audit (AI based) for Polygon Mainnet: 
+          <br/>
+          <a href="https://polygonscan.com/contractsVerified" target='_blank' rel="noreferrer">https://polygonscan.com/contractsVerified</a>
+        </pre>
       </Typography>
+
       <TextField
         variant="outlined"
         className={classes.textField}
@@ -70,4 +76,4 @@ function RiskScoreForm() {
   );
 }
 
-export default RiskScoreForm;
+export default PolygonRiskScoreForm;
