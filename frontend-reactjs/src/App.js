@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { AppBar, Toolbar, Box, Typography } from '@material-ui/core';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import { AppBar, Toolbar, Box, Typography, Tabs, Tab } from '@material-ui/core';
 import axios from 'axios';
 import Summary from './Summary';
 import PolygonContracts from './PolygonContracts';
@@ -21,6 +20,7 @@ function App() {
   const [data, setData] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [value, setValue] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,6 +40,10 @@ function App() {
     setPage(0);
   };
 
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   if (!data) {
     return 'Loading...';
   }
@@ -56,36 +60,18 @@ function App() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Tabs>
-        <TabList>
-          <Tab>Summary</Tab>
-          <Tab>Polygon Smart Contract Audit</Tab>
-          <Tab>Ethereum Smart Contract Audit</Tab>
-          <Tab>Leaderboard: Polygon</Tab>
-          <Tab>Leaderboard: Ethereum</Tab>
-        </TabList>
-
-        <TabPanel>
-          <Summary data={data} />
-        </TabPanel>
-
-        <TabPanel>
-          <PolygonRiskScoreForm />
-        </TabPanel>
-
-        <TabPanel>
-          <EthereumRiskScoreForm />
-        </TabPanel>
-
-        <TabPanel>
-          <PolygonContracts data={data} page={page} rowsPerPage={rowsPerPage} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} />
-        </TabPanel>
-
-        <TabPanel>
-          <EthereumContracts data={data} page={page} rowsPerPage={rowsPerPage} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} />
-        </TabPanel>
-
+      <Tabs value={value} onChange={handleChange}>
+        <Tab label="Summary" />
+        <Tab label="Polygon Smart Contract Audit" />
+        <Tab label="Ethereum Smart Contract Audit" />
+        <Tab label="Leaderboard: Polygon" />
+        <Tab label="Leaderboard: Ethereum" />
       </Tabs>
+      {value === 0 && <Summary data={data} />}
+      {value === 1 && <PolygonRiskScoreForm />}
+      {value === 2 && <EthereumRiskScoreForm />}
+      {value === 3 && <PolygonContracts data={data} page={page} rowsPerPage={rowsPerPage} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} />}
+      {value === 4 && <EthereumContracts data={data} page={page} rowsPerPage={rowsPerPage} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} />}
     </ThemeProvider>
   );
 }
