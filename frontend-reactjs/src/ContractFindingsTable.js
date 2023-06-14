@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTable, usePagination } from 'react-table';
+import ImpactChart from './ImpactChart'; 
 
 function ContractFindingsTable({ data }) {
   const columns = React.useMemo(
@@ -42,6 +43,7 @@ function ContractFindingsTable({ data }) {
 
   return (
     <div style={{ padding: '0 5%' }}>
+      <ImpactChart data={data} />
       <table {...getTableProps()} style={{ width: '100%', height: 400 }}>
         <thead>
           {headerGroups.map(headerGroup => (

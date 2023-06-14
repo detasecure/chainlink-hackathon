@@ -38,9 +38,6 @@ function EthereumRiskScoreForm() {
       setAdditionalData(response.data); // store the entire response data
       const new_findings = response.data.scan_result.contract_findings.filter(finding => ['High', 'Medium', 'Low', 'Informational'].includes(finding.Impact)).map((finding, index) => ({ ...finding, id: index + 1 }));
       setFindings(new_findings);
-      // console.log(response.data.scan_result.contract_findings);
-      // console.log(response.data.scan_result.contract_findings.filter(finding => ['High', 'Medium', 'Low'].includes(finding.Impact)).map((finding, index) => ({ ...finding, id: index + 1 })));
-      // console.log(findings);
 
     } catch (error) {
       console.error(error);
@@ -89,7 +86,7 @@ function EthereumRiskScoreForm() {
       {riskScore && <Typography variant="h6" style={{color:getRiskScoreColor(riskScore)}}>Risk Score: {riskScore}</Typography>}
 
       <div>
-        {additionalData && additionalData.result_summary && Object.entries(additionalData.result_summary).filter(([key]) => ['Low', 'Medium', 'High'].includes(key)).map(([key, value]) => `${key}: ${value}`).join(', ')}
+        {additionalData && additionalData.result_summary && Object.entries(additionalData.result_summary).filter(([key]) => ['Informational', 'Low', 'Medium', 'High'].includes(key)).map(([key, value]) => `${key}: ${value}`).join(', ')}
       </div>
 
       {findings && <div><ContractFindingsTable data={findings}/></div>}
