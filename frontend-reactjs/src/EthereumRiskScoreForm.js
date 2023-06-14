@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { TextField, Button, Typography, makeStyles, CircularProgress } from '@material-ui/core';
 import AsciiLogoEthereum from './AsciiLogoEthereum';
+import ContractFindingsTable from './ContractFindingsTable';
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -26,13 +27,21 @@ function EthereumRiskScoreForm() {
   const [riskScore, setRiskScore] = useState(null);
   const [loading, setLoading] = useState(false);
   const [additionalData, setAdditionalData] = useState(null);
+  const [findings, setFindings] = useState(null);
 
   const getRiskScore = async () => {
     setLoading(true);
     try {
       const response = await axios.get(`http://localhost:8080/api/get_risk_score_ethereum_mainnet_verified_contract?smart_contract_address=${address}`);
       setRiskScore(response.data.risk_score);
+      console.log(response.data);
       setAdditionalData(response.data); // store the entire response data
+      const new_findings = response.data.scan_result.contract_findings.filter(finding => ['High', 'Medium', 'Low', 'Informational'].includes(finding.Impact)).map((finding, index) => ({ ...finding, id: index + 1 }));
+      setFindings(new_findings);
+      // console.log(response.data.scan_result.contract_findings);
+      // console.log(response.data.scan_result.contract_findings.filter(finding => ['High', 'Medium', 'Low'].includes(finding.Impact)).map((finding, index) => ({ ...finding, id: index + 1 })));
+      // console.log(findings);
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -40,12 +49,18 @@ function EthereumRiskScoreForm() {
     }
   };
 
+  const getRiskScoreColor = (score) => {
+    if (score <= 30) {
+      return 'green';
+    } else if (score <= 60) {
+      return 'orange';
+    } else {
+      return 'red';
+    }
+  };
+
   return (
     <div className={classes.form}>
-        <br/>
-        <br/>
-        <br/>
-
       <AsciiLogoEthereum/>
       <Typography variant="h5" gutterBottom>
         <pre> 
@@ -69,8 +84,17 @@ function EthereumRiskScoreForm() {
       >
         {loading ? <CircularProgress size={24} /> : 'Get Risk Score'}
       </Button>
-      {riskScore && <Typography variant="h6">Risk Score: {riskScore}</Typography>}
-      {additionalData && <pre>{JSON.stringify(additionalData, null, 2)}</pre>}
+      <br/>
+      <br/>
+      {riskScore && <Typography variant="h6" style={{color:getRiskScoreColor(riskScore)}}>Risk Score: {riskScore}</Typography>}
+
+      <div>
+        {additionalData && additionalData.result_summary && Object.entries(additionalData.result_summary).filter(([key]) => ['Low', 'Medium', 'High'].includes(key)).map(([key, value]) => `${key}: ${value}`).join(', ')}
+      </div>
+
+      {findings && <div><ContractFindingsTable data={findings}/></div>}
+      <br/>
+      
     </div>
   );
 }

@@ -10,7 +10,6 @@ import EthereumContracts from './EthereumContracts';
 import PolygonRiskScoreForm from './PolygonRiskScoreForm';
 import EthereumRiskScoreForm from './EthereumRiskScoreForm';
 
-
 // Create a dark theme
 const theme = createMuiTheme({
   palette: {
