@@ -32,7 +32,7 @@ function EthereumRiskScoreForm() {
   const getRiskScore = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8080/api/get_risk_score_ethereum_mainnet_verified_contract?smart_contract_address=${address}`);
+      const response = await axios.get(`http://3.108.126.225/:8080/api/get_risk_score_ethereum_mainnet_verified_contract?smart_contract_address=${address}`);
       setRiskScore(response.data.risk_score);
       console.log(response.data);
       setAdditionalData(response.data); // store the entire response data
