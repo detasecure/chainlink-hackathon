@@ -9,6 +9,8 @@ import EthereumContracts from './EthereumContracts';
 import PolygonRiskScoreForm from './PolygonRiskScoreForm';
 import EthereumRiskScoreForm from './EthereumRiskScoreForm';
 
+const timeOutInterval = 300000;
+
 const useStyles = makeStyles({
   root: {
     height: '100vh',
@@ -32,147 +34,128 @@ const useStyles = makeStyles({
   },
 });
 
-
 const SignInOutButton = ({ user: { loggedIn } }) => {
   const [data, setData] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [value, setValue] = useState(0);
-  const [lastActivity, setLastActivity] = useState(Date.now()); // New state for last activity time
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // New state for login status
-
+  const [sessionTimeout, setSessionTimeout] = useState(null);
+  const [hasSessionTimedOut, setHasSessionTimedOut] = useState(false);
+  
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios('http://3.108.126.225:8080/api/get_all_contract_stats_summary'); // Replace with your API link
       setData(result.data);
     };
+    
+    if(loggedIn && !data) {
+      fetchData();
+    }
+  }, [loggedIn, data]);
 
-    fetchData();
-  }, []);
-
-    // New effect for session timeout
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (Date.now() - lastActivity > 10000) { // 10 seconds timeout
-        setIsLoggedIn(false);
-      }
-    }, 1000); // Check every second
-
-    return () => clearInterval(interval);
-  }, [lastActivity]);
+    if (loggedIn) {
+      setSessionTimeout(setTimeout(() => {
+        fcl.unauthenticate();
+        setHasSessionTimedOut(true);
+      }, timeOutInterval)); // 10 seconds
+    } else if (sessionTimeout) {
+      clearTimeout(sessionTimeout);
+    }
+  }, [loggedIn]);
 
   const classes = useStyles();
   
-  if (!data) {
+  if (loggedIn && !data) {
     return 'Loading...';
   }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    setLastActivity(Date.now()); // Update last activity time
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-    setLastActivity(Date.now()); // Update last activity time
   };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    setLastActivity(Date.now()); // Update last activity time
   };
 
+  const handleActivity = () => {
+    if (sessionTimeout) {
+      clearTimeout(sessionTimeout);
+    }
+    setSessionTimeout(setTimeout(() => {
+      fcl.unauthenticate();
+      setHasSessionTimedOut(true);
+    }, timeOutInterval)); // 10 seconds
+  };
 
   const signInOrOut = async (event) => {
     event.preventDefault()
 
     if (loggedIn) {
       fcl.unauthenticate()
-      setIsLoggedIn(false)
     } else {
       fcl.authenticate()
-      setIsLoggedIn(true)
+      setHasSessionTimedOut(false);
     }
   }
 
   return (
+    <div onMouseMove={handleActivity} onClick={handleActivity} onKeyDown={handleActivity}>
+      <div style={{ 
+        height: '100vh', 
+        backgroundSize: 'cover' 
+      }}>
+        <AppBar position="static">
+          <Toolbar>
+            <img src="https://getsecured.ai/images/getsecured-logo.png" alt="GETSecured" height="60" />
+            <Box flexGrow={1} />
+            <Typography variant="h4">
+              OracleSentry
+            </Typography>
+            {loggedIn?(<Button variant="contained" color="primary" onClick={signInOrOut}> Sign Out </Button>):<></>}
+          </Toolbar>
+        </AppBar>
 
-    <div style={{ 
-      // backgroundImage: `url(${process.env.PUBLIC_URL + '/gradient-network-connection-background/5039684.jpg'})`, 
-      height: '100vh', 
-      backgroundSize: 'cover' 
-    }}>
-      {/* <div className={classes.root}>
-        <h1>GETSecured OracleSentry</h1>
         {loggedIn? (
-          <div>
-            <GetLatestBlock/>
-            <Button type="submit" variant="contained" color="primary" onClick={signInOrOut}> Sign Out </Button>
+          <>
+            <Tabs value={value} onChange={handleChange}>
+              <Tab label="Summary" />
+              <Tab label="Polygon Smart Contract Audit" />
+              <Tab label="Ethereum Smart Contract Audit" />
+              <Tab label="Leaderboard: Polygon" />
+              <Tab label="Leaderboard: Ethereum" />
+            </Tabs>
+            {value === 0 && <Summary data={data} />}
+            {value === 1 && <PolygonRiskScoreForm />}
+            {value === 2 && <EthereumRiskScoreForm />}
+            {value === 3 && <PolygonContracts data={data} page={page} rowsPerPage={rowsPerPage} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} />}
+            {value === 4 && <EthereumContracts data={data} page={page} rowsPerPage={rowsPerPage} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} />}
+          </>
+
+        ) : (
+
+      <div style={{ 
+        backgroundImage: `url(${process.env.PUBLIC_URL + '/gradient-network-connection-background/5039684.jpg'})`, 
+        height: '100vh', 
+        backgroundSize: 'cover' 
+      }}>
+          <div className={classes.root}>
+            <form className={classes.form}>
+              {hasSessionTimedOut && <p>Session timed out, login again</p>}
+              <Button variant="contained" color="primary" onClick={signInOrOut}> Sign In </Button>
+            </form>
           </div>
-        )
-        : (<Button type="submit" variant="contained" color="primary" onClick={signInOrOut}> Sign In </Button>)}
-      </div> */}
-
-      <AppBar position="static">
-        <Toolbar>
-          <img src="https://getsecured.ai/images/getsecured-logo.png" alt="GETSecured" height="60" />
-          <Box flexGrow={1} />
-          <Typography variant="h4">
-            OracleSentry
-          </Typography>
-          {loggedIn?(<Button variant="contained" color="primary" onClick={signInOrOut}> Sign Out </Button>):<></>}
-        </Toolbar>
-      </AppBar>
-
-      {loggedIn? (
-        <>
-          <Tabs value={value} onChange={handleChange}>
-            <Tab label="Summary" />
-            <Tab label="Polygon Smart Contract Audit" />
-            <Tab label="Ethereum Smart Contract Audit" />
-            <Tab label="Leaderboard: Polygon" />
-            <Tab label="Leaderboard: Ethereum" />
-          </Tabs>
-          {value === 0 && <Summary data={data} />}
-          {value === 1 && <PolygonRiskScoreForm />}
-          {value === 2 && <EthereumRiskScoreForm />}
-          {value === 3 && <PolygonContracts data={data} page={page} rowsPerPage={rowsPerPage} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} />}
-          {value === 4 && <EthereumContracts data={data} page={page} rowsPerPage={rowsPerPage} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} />}
-        </>
-
-      ) : (
-
-    <div style={{ 
-      backgroundImage: `url(${process.env.PUBLIC_URL + '/gradient-network-connection-background/5039684.jpg'})`, 
-      height: '100vh', 
-      backgroundSize: 'cover' 
-    }}>
-
-
-
-
-      <div className={classes.root}>
-        <form className={classes.form}>
-          <Button variant="contained" color="primary" onClick={signInOrOut}> Sign In </Button>
-        </form>
+        </div>
+        )}
       </div>
-      </div>
-        
-
-
-      )}
-
-
-
-
-
-
     </div>
   )
 }
-
-
 
 const CurrentUser = () => {
   const [user, setUser] = useState({})
