@@ -4,10 +4,18 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import * as fcl from "@blocto/fcl"
+
+fcl.config()
+  .put("accessNode.api", "https://rest-testnet.onflow.org") // connect to Flow testnet
+  .put("discovery.wallet", `https://wallet-v2-dev.blocto.app/35ca2e44-f546-400a-bdee-84776c0282a9/flow/authn`) // use Blocto testnet wallet
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
+    {/* <RootLayout/> */}
   </React.StrictMode>
 );
 
